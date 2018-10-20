@@ -736,8 +736,6 @@ moved_recent_item:
     break;
 
   case Emulator::kStella:
-  case Emulator::kPicoDrive:
-  case Emulator::kGenesisPlusGx:
   case Emulator::kHandy:
   case Emulator::kBeetleSgx:
   case Emulator::kMednafenPsx:
@@ -747,6 +745,34 @@ moved_recent_item:
     data = _core.getMemoryData(RETRO_MEMORY_SYSTEM_RAM);
     size = _core.getMemorySize(RETRO_MEMORY_SYSTEM_RAM);
     registerMemoryRegion(&numBanks, 0, data, size);
+    break;
+
+  case Emulator::kPicoDrive:
+  case Emulator::kGenesisPlusGx:
+    data = _core.getMemoryData(RETRO_MEMORY_SYSTEM_RAM);
+    size = _core.getMemorySize(RETRO_MEMORY_SYSTEM_RAM);
+    registerMemoryRegion(&numBanks, 0, data, size);
+
+    data = _core.getMemoryData(RETRO_MEMORY_SAVE_RAM);
+    size = _core.getMemorySize(RETRO_MEMORY_SAVE_RAM);
+    registerMemoryRegion(&numBanks, 1, data, size);
+
+    if (size < 65536)
+    {
+      size_t fill = 65536 - size;
+
+      while (fill > 1024)
+      {
+        registerMemoryRegion(&numBanks, 1, _1k, 1024);
+        fill -= 1024;
+      }
+
+      if (fill != 0)
+      {
+        registerMemoryRegion(&numBanks, 1, _1k, fill);
+      }
+    }
+
     break;
 
   case Emulator::kSnes9x:
