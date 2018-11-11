@@ -905,6 +905,31 @@ moved_recent_item:
     }
 
     break;
+  
+  case Emulator::kFreeIntv:
+    {
+      const struct retro_memory_map* mmap = _core.getMemoryMap();
+
+      for (unsigned i = 0; i < mmap->num_descriptors; i++)
+      {
+        if (mmap->descriptors[i].start == 0x0100)
+        {
+          // Scratchpad RAM
+          data = mmap->descriptors[i].ptr;
+          size = mmap->descriptors[i].len;
+          registerMemoryRegion(&numBanks, 0, data, size);
+        }
+        else if (mmap->descriptors[i].start == 0x0200)
+        {
+          // System RAM
+          data = mmap->descriptors[i].ptr;
+          size = mmap->descriptors[i].len;
+          registerMemoryRegion(&numBanks, 1, data, size);
+        }
+      }
+    }
+
+    break;
   }
 
   for (unsigned bank = 0; bank < numBanks; bank++)
@@ -1598,12 +1623,14 @@ void Application::handle(const SDL_SysWMEvent* syswm)
     case IDM_SYSTEM_MEDNAFENVB:
     case IDM_SYSTEM_FBALPHA:
     case IDM_SYSTEM_PROSYSTEM:
+    case IDM_SYSTEM_FREEINTV:
       {
         static Emulator emulators[] =
         {
           Emulator::kStella, Emulator::kSnes9x, Emulator::kPicoDrive, Emulator::kGenesisPlusGx, Emulator::kFceumm,
           Emulator::kHandy, Emulator::kBeetleSgx, Emulator::kGambatte, Emulator::kMGBA, Emulator::kMednafenPsx,
-          Emulator::kMednafenNgp, Emulator::kMednafenVb, Emulator::kFBAlpha, Emulator::kProSystem
+          Emulator::kMednafenNgp, Emulator::kMednafenVb, Emulator::kFBAlpha, Emulator::kProSystem,
+          Emulator::kFreeIntv
         };
 
         _fsm.loadCore(emulators[cmd - IDM_SYSTEM_STELLA]);
